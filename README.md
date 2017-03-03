@@ -1,6 +1,6 @@
 # junit5-guice-extension
 
-A [JUnit5 extension](src/main/java/name/falgout/jeffrey/testing/junit5/GuiceExtension.java) which will inject fields marked with `@Inject` and will attempt to resolve any method parameters in your tests.
+A [JUnit 5 extension](src/main/java/name/falgout/jeffrey/testing/junit5/GuiceExtension.java) which will inject fields marked with `@Inject` and will attempt to resolve any method parameters in your tests.
 
 ````java
 @ExtendWith(GuiceExtension.class)
