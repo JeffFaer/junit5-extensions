@@ -21,6 +21,7 @@ import com.google.inject.Key;
 public class GuiceExtensionTest {
   @Inject static int STATIC_INJECTION;
   @Inject Object memberInjection;
+  @Inject @SomeQualifyingAnnotation String qualifiedField;
 
   @Test
   void staticInjection() {
@@ -67,6 +68,16 @@ public class GuiceExtensionTest {
     assertThat(fooBar).asList().containsExactly("foo", "bar").inOrder();
 
     assertNull(injector.getExistingBinding(Key.get(String[].class)));
+  }
+
+  @Test
+  void canInjectQualifiedFields() {
+    assertThat(qualifiedField).isEqualTo(TestModule.QUALIFIED);
+  }
+
+  @Test
+  void canInjectQualifiedParameters(@SomeBindingAnnotation String bound) {
+    assertThat(bound).isEqualTo(TestModule.BOUND);
   }
 
   static final class FooBarExtension implements ParameterResolver {
