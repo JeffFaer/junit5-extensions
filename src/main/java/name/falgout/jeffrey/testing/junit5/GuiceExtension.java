@@ -6,10 +6,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 
 import javax.inject.Qualifier;
@@ -45,7 +49,7 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     });
   }
 
-  private Optional<Injector> getOrCreateInjector(ExtensionContext context) throws Exception {
+  private static Optional<Injector> getOrCreateInjector(ExtensionContext context) throws Exception {
     if (!context.getElement().isPresent()) {
       return Optional.empty();
     }
@@ -62,7 +66,7 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return Optional.of(injector);
   }
 
-  private Injector createInjector(ExtensionContext context) throws Exception {
+  private static Injector createInjector(ExtensionContext context) throws Exception {
     Optional<Injector> parentInjector = getParentInjector(context);
     List<? extends Module> modules = getNewModules(context);
 
@@ -70,7 +74,7 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
         .orElse(Guice.createInjector(modules));
   }
 
-  private Optional<Injector> getParentInjector(ExtensionContext context) throws Exception {
+  private static Optional<Injector> getParentInjector(ExtensionContext context) throws Exception {
     if (context.getParent().isPresent()) {
       return getOrCreateInjector(context.getParent().get());
     }
@@ -102,38 +106,81 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return modules;
   }
 
+  /**
+   * @return module types that are introduced for the first time by the given context (they do not
+   *         appear in the enclosing context).
+   */
   private static Set<Class<? extends Module>> getNewModuleTypes(ExtensionContext context) {
     if (!context.getElement().isPresent()) {
       return Collections.emptySet();
     }
 
-    Set<Class<? extends Module>> moduleTypes = getModuleTypes(context.getElement().get());
-    context.getParent().map(GuiceExtension::getAllModuleTypes).ifPresent(moduleTypes::removeAll);
+    Set<Class<? extends Module>> moduleTypes = getAllModuleTypes(context.getElement().get());
+    context.getParent()
+        .map(GuiceExtension::getContextModuleTypes)
+        .ifPresent(moduleTypes::removeAll);
 
     return moduleTypes;
   }
 
-  private static Set<Class<? extends Module>> getAllModuleTypes(ExtensionContext context) {
-    return getAllModuleTypes(Optional.of(context));
+  private static Set<Class<? extends Module>> getContextModuleTypes(ExtensionContext context) {
+    return getContextModuleTypes(Optional.of(context));
   }
 
-  private static Set<Class<? extends Module>> getAllModuleTypes(
+  /**
+   * @return module types that are present in the given context or any of its enclosing contexts.
+   */
+  private static Set<Class<? extends Module>> getContextModuleTypes(
       Optional<ExtensionContext> context) {
     // TODO: Cache?
 
-    Set<Class<? extends Module>> allModuleTypes = new LinkedHashSet<>();
+    Set<Class<? extends Module>> contextModuleTypes = new LinkedHashSet<>();
     ExtensionContext currentContext;
     while ((currentContext = context.orElse(null)) != null
         && (currentContext.getElement().isPresent() || currentContext.getParent().isPresent())) {
       currentContext.getElement()
-          .map(GuiceExtension::getModuleTypes)
-          .ifPresent(allModuleTypes::addAll);
+          .map(GuiceExtension::getAllModuleTypes)
+          .ifPresent(contextModuleTypes::addAll);
       context = currentContext.getParent();
     }
 
-    return allModuleTypes;
+    return contextModuleTypes;
   }
 
+  private static Set<Class<? extends Module>> getAllModuleTypes(AnnotatedElement element) {
+    if (element instanceof Class<?>) {
+      return getAllModuleTypes((Class<?>) element);
+    }
+
+    return getModuleTypes(element);
+  }
+
+  /**
+   * @return module types that are present on the class or any of its superclasses.
+   */
+  private static Set<Class<? extends Module>> getAllModuleTypes(Class<?> clazz) {
+    Set<Class<? extends Module>> moduleTypes = new LinkedHashSet<>();
+    Set<Class<?>> visited = new HashSet<>();
+    Queue<Class<?>> toVisit = new LinkedList<>();
+    toVisit.add(clazz);
+
+    while (!toVisit.isEmpty()) {
+      Class<?> current = toVisit.poll();
+      if (current == null || visited.contains(current)) {
+        continue;
+      }
+
+      moduleTypes.addAll(getModuleTypes(current));
+      toVisit.add(current.getSuperclass());
+      toVisit.addAll(Arrays.asList(current.getInterfaces()));
+    }
+
+    return moduleTypes;
+  }
+
+  /**
+   * @return module types present on the element.
+   */
   private static Set<Class<? extends Module>> getModuleTypes(AnnotatedElement element) {
     Set<Class<? extends Module>> moduleTypes = new LinkedHashSet<>();
     for (IncludeModule included : element.getAnnotationsByType(IncludeModule.class)) {
@@ -188,7 +235,7 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return injector.getInstance(key);
   }
 
-  private Key<?> getKey(Parameter parameter) {
+  private static Key<?> getKey(Parameter parameter) {
     TypeToken<?> classType = TypeToken.of(parameter.getDeclaringExecutable().getDeclaringClass());
     Type resolvedType = classType.resolveType(parameter.getParameterizedType()).getType();
 

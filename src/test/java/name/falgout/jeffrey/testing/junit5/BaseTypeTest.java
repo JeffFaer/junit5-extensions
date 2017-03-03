@@ -14,8 +14,7 @@ public abstract class BaseTypeTest {
   @Inject String baseClassFieldInjection;
 
   @Test
-  void baseClassIsNotInjected(byte baseClassParameterInjection) {
-    // XXX: Why is baseClassFieldInjection being set to "" instead of "abc" or null?
+  void baseClassIsInjected(byte baseClassParameterInjection) {
     assertAll(() -> assertThat(baseClassFieldInjection).isEqualTo(TestModule.STRING),
         () -> assertThat(baseClassParameterInjection).isEqualTo(TestModule2.BYTE));
   }
