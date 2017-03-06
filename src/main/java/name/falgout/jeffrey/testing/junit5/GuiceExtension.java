@@ -3,6 +3,7 @@ package name.falgout.jeffrey.testing.junit5;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -49,7 +50,9 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     });
   }
 
-  private static Optional<Injector> getOrCreateInjector(ExtensionContext context) throws Exception {
+  private static Optional<Injector> getOrCreateInjector(ExtensionContext context)
+      throws NoSuchMethodException, InstantiationException, IllegalAccessException,
+      InvocationTargetException {
     if (!context.getElement().isPresent()) {
       return Optional.empty();
     }
@@ -66,7 +69,8 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return Optional.of(injector);
   }
 
-  private static Injector createInjector(ExtensionContext context) throws Exception {
+  private static Injector createInjector(ExtensionContext context) throws NoSuchMethodException,
+      InstantiationException, IllegalAccessException, InvocationTargetException {
     Optional<Injector> parentInjector = getParentInjector(context);
     List<? extends Module> modules = getNewModules(context);
 
@@ -74,7 +78,9 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
         .orElse(Guice.createInjector(modules));
   }
 
-  private static Optional<Injector> getParentInjector(ExtensionContext context) throws Exception {
+  private static Optional<Injector> getParentInjector(ExtensionContext context)
+      throws NoSuchMethodException, InstantiationException, IllegalAccessException,
+      InvocationTargetException {
     if (context.getParent().isPresent()) {
       return getOrCreateInjector(context.getParent().get());
     }
@@ -82,7 +88,9 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return Optional.empty();
   }
 
-  private static List<? extends Module> getNewModules(ExtensionContext context) throws Exception {
+  private static List<? extends Module> getNewModules(ExtensionContext context)
+      throws NoSuchMethodException, InstantiationException, IllegalAccessException,
+      InvocationTargetException {
     Set<Class<? extends Module>> moduleTypes = getNewModuleTypes(context);
     List<Module> modules = new ArrayList<>(moduleTypes.size());
     for (Class<? extends Module> moduleType : moduleTypes) {
