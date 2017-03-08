@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>name.falgout.jeffrey.testing</groupId>
   <artifactId>junit5-guice-extension</artifactId>
-  <version>1.0.0-M3</version>
+  <version>1.0.1-SNAPSHOT</version>
 
   <name>junit5-guice-extension</name>
   <url>https://github.com/JeffreyFalgout/junit5-guice-extension</url>
@@ -21,7 +21,7 @@
     <connection>scm:git:${project.url}.git</connection>
     <developerConnection>scm:git:git@github.com:JeffreyFalgout/${project.name}.git</developerConnection>
     <url>${project.url}</url>
-    <tag>1.0.0-M3</tag>
+    <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>github</system>
