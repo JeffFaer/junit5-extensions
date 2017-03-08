@@ -1,5 +1,7 @@
 # junit5-guice-extension
 
+[![Maven Central][mvn-img]][mvn-link]
+
 A [JUnit 5 extension](src/main/java/name/falgout/jeffrey/testing/junit5/GuiceExtension.java) which will inject fields marked with `@Inject` and will attempt to resolve any method parameters in your tests.
 
 ````java
@@ -35,12 +37,5 @@ public class YourTest {
 }
 ````
 
-## How can I use this library in my project?
-- Clone the repository and use Maven to create a .jar file:
-````
-git clone https://github.com/JeffreyFalgout/junit5-guice-extension
-cd junit5-guice-extension/
-mvn package
-````
-
-- <strike>Maven Central</strike> Coming soon!
+[mvn-img]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing/junit5-guice-extension/badge.svg
+[mvn-link]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing/junit5-guice-extension
