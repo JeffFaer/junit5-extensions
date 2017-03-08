@@ -50,6 +50,10 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     });
   }
 
+  /**
+   * @return An injector for the given context if and only if the given context has an
+   *         {@link ExtensionContext#getElement() element}.
+   */
   private static Optional<Injector> getOrCreateInjector(ExtensionContext context)
       throws NoSuchMethodException, InstantiationException, IllegalAccessException,
       InvocationTargetException {
@@ -88,6 +92,12 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return Optional.empty();
   }
 
+  /**
+   * @throws NoSuchMethodException there is no zero-args constructor for a module
+   * @throws InstantiationException one of the module classes is abstract
+   * @throws IllegalAccessException we call setAccessible(true), so this shouldn't happen
+   * @throws InvocationTargetException a module's constructor threw an exception
+   */
   private static List<? extends Module> getNewModules(ExtensionContext context)
       throws NoSuchMethodException, InstantiationException, IllegalAccessException,
       InvocationTargetException {
@@ -209,20 +219,28 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     }
 
     Key<?> key = getKey(parameter);
-    Injector injector;
+    Optional<Injector> optInjector = getInjectorForParameterResolution(extensionContext);
+    return optInjector.map(injector -> injector.getExistingBinding(key)).isPresent();
+  }
+
+  /**
+   * Wrap {@link #getOrCreateInjector(ExtensionContext)} and rethrow exceptions as
+   * {@link ParameterResolutionException}.
+   */
+  private static Optional<Injector> getInjectorForParameterResolution(
+      ExtensionContext extensionContext) throws ParameterResolutionException {
     try {
-      Optional<Injector> optInjector = getOrCreateInjector(extensionContext);
-      if (!optInjector.isPresent()) {
-        return false;
-      }
-
-      injector = optInjector.get();
-    } catch (Exception e) {
-      throw new ParameterResolutionException(
-          "Could not create injector for: " + extensionContext.getDisplayName(), e);
+      return getOrCreateInjector(extensionContext);
+    } catch (NoSuchMethodException e) {
+      throw new ParameterResolutionException("Could not find a suitable constructor for a module.",
+          e);
+    } catch (InstantiationException e) {
+      throw new ParameterResolutionException("One of the modules is abstract!", e);
+    } catch (IllegalAccessException e) {
+      throw new ParameterResolutionException("We setAccessible(true), this shouldn't happen.", e);
+    } catch (InvocationTargetException e) {
+      throw new ParameterResolutionException("A module constructor threw an exception.", e);
     }
-
-    return injector.getExistingBinding(key) != null;
   }
 
   @Override
@@ -230,15 +248,10 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
       throws ParameterResolutionException {
     Parameter parameter = parameterContext.getParameter();
     Key<?> key = getKey(parameter);
-    Injector injector;
-    try {
-      injector =
-          getOrCreateInjector(extensionContext).orElseThrow(() -> new ParameterResolutionException(
-              "Could not create injector for: " + extensionContext.getDisplayName()));
-    } catch (Exception e) {
-      throw new ParameterResolutionException(
-          "Could not create injector for: " + extensionContext.getDisplayName(), e);
-    }
+    Injector injector = getInjectorForParameterResolution(extensionContext)
+        .orElseThrow(() -> new ParameterResolutionException(
+            "Could not create injector for: " + extensionContext.getDisplayName()
+                + " It has no element."));
 
     return injector.getInstance(key);
   }
