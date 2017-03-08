@@ -75,7 +75,7 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     List<? extends Module> modules = getNewModules(context);
 
     return parentInjector.map(injector -> injector.createChildInjector(modules))
-        .orElse(Guice.createInjector(modules));
+        .orElseGet(() -> Guice.createInjector(modules));
   }
 
   private static Optional<Injector> getParentInjector(ExtensionContext context)
