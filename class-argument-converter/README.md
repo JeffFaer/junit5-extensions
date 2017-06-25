@@ -59,6 +59,6 @@ Converts strings to classes in a type safe way.
 
     @ParameterizedTest
     @ValueSource(strings = "java.lang.Object")
-    void badUpperound(@ConvertWith(ClassArgumentConverter.class) Class<? extends Collection> clazz) {}
+    void badUpperBound(@ConvertWith(ClassArgumentConverter.class) Class<? extends Collection> clazz) {}
     // Will fail since Class<Object> is not assignable to Class<? extends Collection>.
 ````
