@@ -50,11 +50,11 @@ public abstract class TestPlanExecutionReport {
     return Optional.ofNullable(getFailures().get(displayName));
   }
 
-  abstract ImmutableMap<DisplayName, String> getSkipped();
+  public abstract ImmutableMap<DisplayName, String> getSkipped();
 
-  abstract ImmutableSet<DisplayName> getSuccessful();
+  public abstract ImmutableSet<DisplayName> getSuccessful();
 
-  abstract ImmutableMap<DisplayName, Throwable> getFailures();
+  public abstract ImmutableMap<DisplayName, Throwable> getFailures();
 
   @AutoValue.Builder
   public static abstract class Builder {
