@@ -64,4 +64,15 @@ public class TestDisablerTest {
   void parameterizedTest(int value) {
     assertFalse(value > 2);
   }
+
+  static class BadTest {
+    @Test
+    void badTest() {
+      fail("Should have been disabled.");
+    }
+  }
+
+  @Nested
+  @Disable("badTest()")
+  class Subclass extends BadTest {}
 }

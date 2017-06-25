@@ -26,8 +26,10 @@ public class TestDisablerMetaTest {
     DisplayName parameterized1 = DisplayName.create("parameterizedTest(int)", "1");
     DisplayName parameterized2 = DisplayName.create("parameterizedTest(int)", "2");
     DisplayName parameterized3 = DisplayName.create("parameterizedTest(int)", "3");
+
+    DisplayName badTest = DisplayName.create("Subclass", "badTest()");
     assertAll(
-        () -> assertThat(report.getTests()).hasSize(9),
+        () -> assertThat(report.getTests()).hasSize(10),
         () ->
             assertThat(report.getSuccessful())
                 .containsAllOf(
@@ -43,7 +45,8 @@ public class TestDisablerMetaTest {
                     nestedBaz,
                     nestedDifferentDisplayName,
                     nested2,
-                    parameterized3),
+                    parameterized3,
+                    badTest),
         () -> assertThat(report.getSkippedCause(foo)).hasValue("foo!"),
         () -> assertThat(report.getSkippedCause(nestedBaz)).hasValue("baz!")
     );
