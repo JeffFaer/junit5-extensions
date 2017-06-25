@@ -9,9 +9,8 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import java.lang.reflect.InvocationTargetException;
 import javax.inject.Inject;
-import name.falgout.jeffrey.testing.junit5.NegativeExamples.BadModule2;
+import name.falgout.jeffrey.testing.junit5.ExpectFailure.Cause;
 import name.falgout.jeffrey.testing.junit5.GuiceExtensionTest.TestModule;
-import name.falgout.jeffrey.testing.junit5.TestPlanExecutionReport.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -106,49 +105,43 @@ public class GuiceExtensionTest {
     }
   }
 
-  @Test
-  void negativeExamplesTest() {
-    TestPlanExecutionReport report = ExtensionTester.runTests(NegativeExamples.class);
+  @SuppressWarnings("unused")
+  @ExtendWith(ExpectFailureExceptionHandler.class)
+  @Nested
+  class NegativeExamples {
+    @ExpectFailure(
+        @Cause(type = ParameterResolutionException.class, message = "No ParameterResolver")
+    )
+    @Test
+    void tooManyBindingAnnotations(@SomeBindingAnnotation @SomeQualifyingAnnotation String arg) {}
 
-    DisplayName tooManyBindingAnnotations = DisplayName.create("tooManyBindingAnnotations(String)");
-    DisplayName withoutZeroArgConstructor =
-        DisplayName.create("moduleWithoutZeroArgConstructor(String)");
-    DisplayName constructorThrowsException =
-        DisplayName.create("moduleConstructorThrowsException(String)");
-    DisplayName doNotHaveBinding = DisplayName.create("doNotHaveBinding(NegativeExamples)");
-    assertAll(
-        () -> assertThat(report.getTests()).hasSize(4),
-        () ->
-            assertThat(report.getFailures().keySet())
-                .containsAllOf(
-                    tooManyBindingAnnotations,
-                    withoutZeroArgConstructor,
-                    constructorThrowsException,
-                    doNotHaveBinding),
-        () -> {
-          Throwable failure = report.getFailure(tooManyBindingAnnotations).get();
-          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
-        },
-        () -> {
-          Throwable failure = report.getFailure(withoutZeroArgConstructor).get();
-          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
-          assertThat(failure).hasMessageThat().contains("Could not find a suitable constructor");
-          assertThat(failure).hasCauseThat().isInstanceOf(NoSuchMethodException.class);
-        },
-        () -> {
-          Throwable failure = report.getFailure(constructorThrowsException).get();
-          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
-          assertThat(failure).hasCauseThat().isInstanceOf(InvocationTargetException.class);
-          assertThat(failure).hasCauseThat().hasCauseThat()
-              .isInstanceOf(IllegalArgumentException.class);
-          assertThat(failure).hasCauseThat().hasCauseThat().hasMessageThat()
-              .isEqualTo(BadModule2.MESSAGE);
-        },
-        () -> {
-          Throwable failure = report.getFailure(doNotHaveBinding).get();
-          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
-        }
-    );
+    @ExpectFailure({
+        @Cause(
+            type = ParameterResolutionException.class,
+            message = "Could not find a suitable constructor"
+        ),
+        @Cause(type = NoSuchMethodException.class, message = "BadModule1.<init>()")
+    })
+    @Test
+    @IncludeModule(BadModule1.class)
+    void moduleWithoutZeroArgConstructor(String string) {}
+
+    @ExpectFailure({
+        @Cause(
+            type = ParameterResolutionException.class,
+            message = "constructor threw an exception"),
+        @Cause(type = InvocationTargetException.class),
+        @Cause(type = IllegalArgumentException.class, message = BadModule2.MESSAGE)
+    })
+    @Test
+    @IncludeModule(BadModule2.class)
+    void moduleConstructorThrowsException(String string) {}
+
+    @ExpectFailure(
+        @Cause(type = ParameterResolutionException.class, message = "No ParameterResolver")
+    )
+    @Test
+    void doNotHaveBinding(NegativeExamples examples) {}
   }
 
   static final class FooBarExtension implements ParameterResolver {
@@ -190,5 +183,23 @@ public class GuiceExtensionTest {
     protected void configure() {
       bind(byte.class).toInstance(BYTE);
     }
+  }
+
+  static final class BadModule1 extends AbstractModule {
+    public BadModule1(String argument) {}
+
+    @Override
+    protected void configure() {}
+  }
+
+  static final class BadModule2 extends AbstractModule {
+    static final String MESSAGE = "abc123";
+
+    public BadModule2() {
+      throw new IllegalArgumentException(MESSAGE);
+    }
+
+    @Override
+    protected void configure() {}
   }
 }

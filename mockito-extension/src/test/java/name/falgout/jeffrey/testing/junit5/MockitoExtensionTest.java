@@ -7,7 +7,9 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import name.falgout.jeffrey.testing.junit5.ExpectFailure.Cause;
 import name.falgout.jeffrey.testing.junit5.TestPlanExecutionReport.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -52,38 +54,19 @@ public class MockitoExtensionTest {
     assertThat(captor.getAllValues()).containsExactly("foo");
   }
 
-  @Test
-  void negativeExamples() {
-    TestPlanExecutionReport report = ExtensionTester.runTests(NegativeExamples.class);
-
-    DisplayName tooManyFactories = DisplayName.create("tooManyFactories(ArgumentCaptor)");
-    DisplayName notAnnotated = DisplayName.create("notAnnotated(Supplier)");
-    assertAll(
-        () -> assertThat(report.getTests()).hasSize(2),
-        () ->
-            assertThat(report.getFailures().keySet())
-                .containsAllOf(
-                    tooManyFactories,
-                    notAnnotated),
-        () -> {
-          Throwable failure = report.getFailure(tooManyFactories).get();
-          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
-          assertThat(failure).hasMessageThat().contains("Too many factories");
-        },
-        () -> {
-          Throwable failure  = report.getFailure(notAnnotated).get();
-          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
-          assertThat(failure).hasMessageThat().contains("No ParameterResolver registered");
-        }
-    );
-  }
-
   @SuppressWarnings("unused")
-  @ExtendWith(MockitoExtension.class)
-  static class NegativeExamples {
+  @ExtendWith(ExpectFailureExceptionHandler.class)
+  @Nested
+  class NegativeExamples {
+    @ExpectFailure(
+        @Cause(type = ParameterResolutionException.class, message = "Too many factories")
+    )
     @Test
     void tooManyFactories(@Mock ArgumentCaptor<String> whoShouldWin) {}
 
+    @ExpectFailure(
+        @Cause(type = ParameterResolutionException.class, message = "No ParameterResolver")
+    )
     @Test
     void notAnnotated(Supplier<String> notAnnotatedWithMock) {}
   }
