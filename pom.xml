@@ -14,7 +14,6 @@
     <module>disable-extension</module>
     <module>extension-testing</module>
     <module>guice-extension</module>
-    <module>mockito-extension</module>
   </modules>
 
   <properties>
@@ -39,8 +38,7 @@
 
   <scm>
     <connection>scm:git:${base.url}.git</connection>
-    <developerConnection>scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git
-    </developerConnection>
+    <developerConnection>scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git</developerConnection>
     <url>${base.url}</url>
     <tag>HEAD</tag>
   </scm>
