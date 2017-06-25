@@ -27,6 +27,7 @@
 
   <name>${project.artifactId}</name>
   <url>${base.url}</url>
+  <description>Parent project for JUnit 5 extensions.</description>
   <inceptionYear>2017</inceptionYear>
 
   <licenses>
