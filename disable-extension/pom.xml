@@ -13,6 +13,7 @@
   <artifactId>disable-extension</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
+  <name>disable-extension</name>
   <url>${base.url}/tree/master/disable-extension</url>
   <description>Fine-grained test disabling for JUnit 5</description>
   <inceptionYear>2017</inceptionYear>
@@ -42,7 +43,6 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.google.truth</groupId>

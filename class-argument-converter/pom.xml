@@ -13,6 +13,7 @@
   <artifactId>class-argument-converter</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
+  <name>class-argument-converter</name>
   <url>${base.url}/tree/master/class-arugment-converter</url>
   <description>Converts strings to classes for parameterized JUnit 5 tests</description>
   <inceptionYear>2017</inceptionYear>
@@ -37,6 +38,7 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>

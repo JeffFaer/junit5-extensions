@@ -1,13 +1,16 @@
 package name.falgout.jeffrey.testing.junit5;
 
+import com.google.inject.AbstractModule;
+import name.falgout.jeffrey.testing.junit5.GuiceExtensionTest.TestModule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import com.google.inject.AbstractModule;
-
+/**
+ * For some reason, javac really didn't like a static inner class annotated with @ExtendWith.
+ */
 @ExtendWith(GuiceExtension.class)
 @IncludeModule(TestModule.class)
-public class BadUseCases {
+class NegativeExamples {
   @Test
   void tooManyBindingAnnotations(@SomeBindingAnnotation @SomeQualifyingAnnotation String arg) {}
 
@@ -18,6 +21,9 @@ public class BadUseCases {
   @Test
   @IncludeModule(BadModule2.class)
   void moduleConstructorThrowsException(String string) {}
+
+  @Test
+  void doNotHaveBinding(NegativeExamples examples) {}
 
   static final class BadModule1 extends AbstractModule {
     public BadModule1(String argument) {}

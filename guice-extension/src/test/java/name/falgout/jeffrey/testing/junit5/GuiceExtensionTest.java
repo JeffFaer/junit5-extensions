@@ -1,18 +1,17 @@
 package name.falgout.jeffrey.testing.junit5;
 
 import static com.google.common.truth.Truth.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.Mockito.atLeast;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Key;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.function.BiConsumer;
-
 import javax.inject.Inject;
-
+import name.falgout.jeffrey.testing.junit5.NegativeExamples.BadModule2;
+import name.falgout.jeffrey.testing.junit5.GuiceExtensionTest.TestModule;
+import name.falgout.jeffrey.testing.junit5.TestPlanExecutionReport.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,23 +19,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.platform.engine.TestExecutionResult;
-import org.junit.platform.engine.TestExecutionResult.Status;
-import org.junit.platform.engine.discovery.DiscoverySelectors;
-import org.junit.platform.engine.discovery.MethodSelector;
-import org.junit.platform.engine.support.descriptor.MethodSource;
-import org.junit.platform.launcher.Launcher;
-import org.junit.platform.launcher.LauncherDiscoveryRequest;
-import org.junit.platform.launcher.TestExecutionListener;
-import org.junit.platform.launcher.TestIdentifier;
-import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
-import org.junit.platform.launcher.core.LauncherFactory;
-import org.mockito.ArgumentCaptor;
-
-import com.google.inject.Injector;
-import com.google.inject.Key;
-
-import name.falgout.jeffrey.testing.junit5.BadUseCases.BadModule2;
 
 @ExtendWith(GuiceExtension.class)
 @IncludeModule(TestModule.class)
@@ -44,11 +26,6 @@ public class GuiceExtensionTest {
   @Inject static int STATIC_INJECTION;
   @Inject Object memberInjection;
   @Inject @SomeQualifyingAnnotation String qualifiedField;
-
-  TestExecutionListener listener = mock(TestExecutionListener.class);
-  ArgumentCaptor<TestIdentifier> identifierCaptor = ArgumentCaptor.forClass(TestIdentifier.class);
-  ArgumentCaptor<TestExecutionResult> resultCaptor =
-      ArgumentCaptor.forClass(TestExecutionResult.class);
 
   @Test
   void staticInjection() {
@@ -107,76 +84,71 @@ public class GuiceExtensionTest {
     assertThat(bound).isEqualTo(TestModule.BOUND);
   }
 
-  @Test
-  void doesNotInjectParametersWithMultipleBindingAnnotations() throws NoSuchMethodException {
-    testMethod((id, result) -> {
-      assertThat(result.getStatus()).isEqualTo(Status.FAILED);
-      Throwable t = result.getThrowable().get();
-      assertThat(t).isInstanceOf(ParameterResolutionException.class);
-    }, BadUseCases.class, "tooManyBindingAnnotations", String.class);
-  }
+  @SuppressWarnings("unused")
+  @ExtendWith(GuiceExtension.class)
+  @IncludeModule(TestModule.class)
+  static abstract class BaseType {
+    @Inject String baseClassFieldInjection;
 
-  @Test
-  void modulesMustHaveZeroArgConstructor() throws NoSuchMethodException {
-    testMethod((id, result) -> {
-      assertThat(result.getStatus()).isEqualTo(Status.FAILED);
-      Throwable t = result.getThrowable().get();
-      assertThat(t).isInstanceOf(ParameterResolutionException.class);
-      assertThat(t.getCause()).isInstanceOf(NoSuchMethodException.class);
-      assertThat(t.getCause().getMessage()).contains("BadModule1.<init>()");
-    }, BadUseCases.class, "moduleWithoutZeroArgConstructor", String.class);
-  }
-
-  @Test
-  void moduleConstructorCannotThrowException() throws NoSuchMethodException {
-    testMethod((id, result) -> {
-      assertThat(result.getStatus()).isEqualTo(Status.FAILED);
-      Throwable t = result.getThrowable().get();
-      assertThat(t).isInstanceOf(ParameterResolutionException.class);
-      assertThat(t.getCause()).isInstanceOf(InvocationTargetException.class);
-      assertThat(t.getCause().getCause()).isInstanceOf(IllegalArgumentException.class);
-      assertThat(t.getCause().getCause().getMessage()).isEqualTo(BadModule2.MESSAGE);
-    }, BadUseCases.class, "moduleConstructorThrowsException", String.class);
-  }
-
-  private void testMethod(
-      BiConsumer<? super TestIdentifier, ? super TestExecutionResult> resultTest,
-      Class<?> clazz, String methodName, Class<?>... parameterTypes)
-      throws NoSuchMethodException {
-    Launcher launcher = LauncherFactory.create();
-    LauncherDiscoveryRequest discoveryRequest = LauncherDiscoveryRequestBuilder.request()
-        .selectors(selectMethod(BadUseCases.class, methodName, parameterTypes))
-        .build();
-
-    launcher.registerTestExecutionListeners(listener);
-    launcher.execute(discoveryRequest);
-    verify(listener, atLeast(1)).executionFinished(identifierCaptor.capture(),
-        resultCaptor.capture());
-
-    int index = getIndentifierIndex(methodName, identifierCaptor.getAllValues());
-    resultTest.accept(identifierCaptor.getAllValues().get(index),
-        resultCaptor.getAllValues().get(index));
-  }
-
-  private static int getIndentifierIndex(String methodName, List<TestIdentifier> identifiers) {
-    for (int i = 0; i < identifiers.size(); i++) {
-      TestIdentifier identifier = identifiers.get(i);
-      if (identifier.getSource().filter(source -> source instanceof MethodSource).isPresent()) {
-        MethodSource source = (MethodSource) identifier.getSource().get();
-        if (source.getMethodName().equals(methodName)) {
-          return i;
-        }
-      }
+    @Test
+    void baseClassIsInjected(byte baseClassParameterInjection) {
+      assertAll(() -> assertThat(baseClassFieldInjection).isEqualTo(TestModule.STRING),
+          () -> assertThat(baseClassParameterInjection).isEqualTo(TestModule2.BYTE));
     }
-
-    throw new NoSuchElementException(
-        "No identifier with methodName: " + methodName + " found in " + identifiers);
   }
 
-  static MethodSelector selectMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes)
-      throws NoSuchMethodException {
-    return DiscoverySelectors.selectMethod(clazz,
-        clazz.getDeclaredMethod(methodName, parameterTypes));
+  @Nested
+  @IncludeModule(TestModule2.class)
+  class DerivedType extends BaseType {
+    @Test
+    void subTypeCanIncludeModule(byte parameter) {
+      assertThat(parameter).isEqualTo(TestModule2.BYTE);
+    }
+  }
+
+  @Test
+  void negativeExamplesTest() {
+    TestPlanExecutionReport report = ExtensionTester.runTests(NegativeExamples.class);
+
+    DisplayName tooManyBindingAnnotations = DisplayName.create("tooManyBindingAnnotations(String)");
+    DisplayName withoutZeroArgConstructor =
+        DisplayName.create("moduleWithoutZeroArgConstructor(String)");
+    DisplayName constructorThrowsException =
+        DisplayName.create("moduleConstructorThrowsException(String)");
+    DisplayName doNotHaveBinding = DisplayName.create("doNotHaveBinding(NegativeExamples)");
+    assertAll(
+        () -> assertThat(report.getTests()).hasSize(4),
+        () ->
+            assertThat(report.getFailures().keySet())
+                .containsAllOf(
+                    tooManyBindingAnnotations,
+                    withoutZeroArgConstructor,
+                    constructorThrowsException,
+                    doNotHaveBinding),
+        () -> {
+          Throwable failure = report.getFailure(tooManyBindingAnnotations).get();
+          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
+        },
+        () -> {
+          Throwable failure = report.getFailure(withoutZeroArgConstructor).get();
+          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
+          assertThat(failure).hasMessageThat().contains("Could not find a suitable constructor");
+          assertThat(failure).hasCauseThat().isInstanceOf(NoSuchMethodException.class);
+        },
+        () -> {
+          Throwable failure = report.getFailure(constructorThrowsException).get();
+          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
+          assertThat(failure).hasCauseThat().isInstanceOf(InvocationTargetException.class);
+          assertThat(failure).hasCauseThat().hasCauseThat()
+              .isInstanceOf(IllegalArgumentException.class);
+          assertThat(failure).hasCauseThat().hasCauseThat().hasMessageThat()
+              .isEqualTo(BadModule2.MESSAGE);
+        },
+        () -> {
+          Throwable failure = report.getFailure(doNotHaveBinding).get();
+          assertThat(failure).isInstanceOf(ParameterResolutionException.class);
+        }
+    );
   }
 
   static final class FooBarExtension implements ParameterResolver {
@@ -189,7 +161,34 @@ public class GuiceExtensionTest {
     @Override
     public Object resolve(ParameterContext parameterContext, ExtensionContext extensionContext)
         throws ParameterResolutionException {
-      return new String[] {"foo", "bar"};
+      return new String[]{"foo", "bar"};
+    }
+  }
+
+  static final class TestModule extends AbstractModule {
+    static final String STRING = "abc";
+    static final int INT = 5;
+    static final Object OBJECT = new Object();
+    static final String QUALIFIED = "qualifying";
+    static final String BOUND = "binding";
+
+    @Override
+    protected void configure() {
+      bind(String.class).toInstance(STRING);
+      bind(int.class).toInstance(INT);
+      bind(Object.class).toInstance(OBJECT);
+
+      bind(String.class).annotatedWith(SomeBindingAnnotation.class).toInstance(BOUND);
+      bind(String.class).annotatedWith(SomeQualifyingAnnotation.class).toInstance(QUALIFIED);
+    }
+  }
+
+  static final class TestModule2 extends AbstractModule {
+    static final byte BYTE = 1;
+
+    @Override
+    protected void configure() {
+      bind(byte.class).toInstance(BYTE);
     }
   }
 }

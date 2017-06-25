@@ -9,6 +9,14 @@
   <version>1.0.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <modules>
+    <module>class-argument-converter</module>
+    <module>disable-extension</module>
+    <module>extension-testing</module>
+    <module>guice-extension</module>
+    <module>mockito-extension</module>
+  </modules>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.jupiter.version>5.0.0-M4</junit.jupiter.version>
@@ -31,7 +39,8 @@
 
   <scm>
     <connection>scm:git:${base.url}.git</connection>
-    <developerConnection>scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git
+    </developerConnection>
     <url>${base.url}</url>
     <tag>HEAD</tag>
   </scm>
@@ -64,11 +73,6 @@
         <version>${junit.jupiter.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-params</artifactId>
-        <version>${junit.jupiter.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.junit.platform</groupId>
         <artifactId>junit-platform-commons</artifactId>
         <version>${junit.platform.version}</version>
@@ -95,6 +99,12 @@
 
 
       <!-- Test dependencies -->
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-params</artifactId>
+        <version>${junit.jupiter.version}</version>
+        <scope>test</scope>
+      </dependency>
       <dependency>
         <groupId>com.google.truth</groupId>
         <artifactId>truth</artifactId>

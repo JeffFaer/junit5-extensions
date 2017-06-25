@@ -1,5 +1,8 @@
 package name.falgout.jeffrey.testing.junit5;
 
+import static java.util.stream.Collectors.toSet;
+import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -17,8 +20,11 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Qualifier;
 
+import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
@@ -35,27 +41,28 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import org.junit.platform.commons.support.AnnotationSupport;
 
 public final class GuiceExtension implements TestInstancePostProcessor, ParameterResolver {
   private static final Namespace NAMESPACE =
-      Namespace.create("name", "falgout", "jeffrey", "junit5", "guice");
+      Namespace.create("name", "falgout", "jeffrey", "testing", "junit5", "guice");
 
   public GuiceExtension() {}
 
   @Override
   public void postProcessTestInstance(Object testInstance, ExtensionContext context)
       throws Exception {
-    getOrCreateInjector(context).ifPresent(injector -> {
-      injector.injectMembers(testInstance);
-    });
+    getOrCreateInjector(context).ifPresent(injector -> injector.injectMembers(testInstance));
   }
 
   /**
-   * @return An injector for the given context if and only if the given context has an
-   *         {@link ExtensionContext#getElement() element}.
+   * Returns an injector for the given context if and only if the given context has an
+   * {@link ExtensionContext#getElement() annotated element}.
    */
   private static Optional<Injector> getOrCreateInjector(ExtensionContext context)
-      throws NoSuchMethodException, InstantiationException, IllegalAccessException,
+      throws NoSuchMethodException,
+      InstantiationException,
+      IllegalAccessException,
       InvocationTargetException {
     if (!context.getElement().isPresent()) {
       return Optional.empty();
@@ -73,17 +80,23 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return Optional.of(injector);
   }
 
-  private static Injector createInjector(ExtensionContext context) throws NoSuchMethodException,
-      InstantiationException, IllegalAccessException, InvocationTargetException {
+  private static Injector createInjector(ExtensionContext context)
+      throws NoSuchMethodException,
+      InstantiationException,
+      IllegalAccessException,
+      InvocationTargetException {
     Optional<Injector> parentInjector = getParentInjector(context);
     List<? extends Module> modules = getNewModules(context);
 
-    return parentInjector.map(injector -> injector.createChildInjector(modules))
+    return parentInjector
+        .map(injector -> injector.createChildInjector(modules))
         .orElseGet(() -> Guice.createInjector(modules));
   }
 
   private static Optional<Injector> getParentInjector(ExtensionContext context)
-      throws NoSuchMethodException, InstantiationException, IllegalAccessException,
+      throws NoSuchMethodException,
+      InstantiationException,
+      IllegalAccessException,
       InvocationTargetException {
     if (context.getParent().isPresent()) {
       return getOrCreateInjector(context.getParent().get());
@@ -99,7 +112,9 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
    * @throws InvocationTargetException a module's constructor threw an exception
    */
   private static List<? extends Module> getNewModules(ExtensionContext context)
-      throws NoSuchMethodException, InstantiationException, IllegalAccessException,
+      throws NoSuchMethodException,
+      InstantiationException,
+      IllegalAccessException,
       InvocationTargetException {
     Set<Class<? extends Module>> moduleTypes = getNewModuleTypes(context);
     List<Module> modules = new ArrayList<>(moduleTypes.size());
@@ -125,15 +140,15 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
   }
 
   /**
-   * @return module types that are introduced for the first time by the given context (they do not
-   *         appear in the enclosing context).
+   * Returns module types that are introduced for the first time by the given context (they do not
+   * appear in an enclosing context).
    */
   private static Set<Class<? extends Module>> getNewModuleTypes(ExtensionContext context) {
     if (!context.getElement().isPresent()) {
       return Collections.emptySet();
     }
 
-    Set<Class<? extends Module>> moduleTypes = getAllModuleTypes(context.getElement().get());
+    Set<Class<? extends Module>> moduleTypes = getModuleTypes(context.getElement().get());
     context.getParent()
         .map(GuiceExtension::getContextModuleTypes)
         .ifPresent(moduleTypes::removeAll);
@@ -146,68 +161,39 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
   }
 
   /**
-   * @return module types that are present in the given context or any of its enclosing contexts.
+   * Returns module types that are present on the given context or any of its enclosing contexts.
    */
   private static Set<Class<? extends Module>> getContextModuleTypes(
       Optional<ExtensionContext> context) {
     // TODO: Cache?
 
     Set<Class<? extends Module>> contextModuleTypes = new LinkedHashSet<>();
-    ExtensionContext currentContext;
-    while ((currentContext = context.orElse(null)) != null
-        && (currentContext.getElement().isPresent() || currentContext.getParent().isPresent())) {
-      currentContext.getElement()
-          .map(GuiceExtension::getAllModuleTypes)
+    while (context.isPresent() && (hasAnnotatedElement(context) || hasParent(context))) {
+      context
+          .flatMap(ExtensionContext::getElement)
+          .map(GuiceExtension::getModuleTypes)
           .ifPresent(contextModuleTypes::addAll);
-      context = currentContext.getParent();
+      context = context.flatMap(ExtensionContext::getParent);
     }
 
     return contextModuleTypes;
   }
 
-  private static Set<Class<? extends Module>> getAllModuleTypes(AnnotatedElement element) {
-    if (element instanceof Class<?>) {
-      return getAllModuleTypes((Class<?>) element);
-    }
-
-    return getModuleTypes(element);
+  private static boolean hasAnnotatedElement(Optional<ExtensionContext> context) {
+    return context.flatMap(ExtensionContext::getElement).isPresent();
   }
 
-  /**
-   * @return module types that are present on the class or any of its superclasses.
-   */
-  private static Set<Class<? extends Module>> getAllModuleTypes(Class<?> clazz) {
-    Set<Class<? extends Module>> moduleTypes = new LinkedHashSet<>();
-    Set<Class<?>> visited = new HashSet<>();
-    Queue<Class<?>> toVisit = new LinkedList<>();
-    toVisit.add(clazz);
-
-    while (!toVisit.isEmpty()) {
-      Class<?> current = toVisit.poll();
-      if (current == null || visited.contains(current)) {
-        continue;
-      }
-
-      moduleTypes.addAll(getModuleTypes(current));
-      toVisit.add(current.getSuperclass());
-      toVisit.addAll(Arrays.asList(current.getInterfaces()));
-    }
-
-    return moduleTypes;
+  private static boolean hasParent(Optional<ExtensionContext> context) {
+    return context.flatMap(ExtensionContext::getParent).isPresent();
   }
 
-  /**
-   * @return module types present on the element.
-   */
   private static Set<Class<? extends Module>> getModuleTypes(AnnotatedElement element) {
-    Set<Class<? extends Module>> moduleTypes = new LinkedHashSet<>();
-    for (IncludeModule included : element.getAnnotationsByType(IncludeModule.class)) {
-      for (Class<? extends Module> moduleType : included.value()) {
-        moduleTypes.add(moduleType);
-      }
-    }
-
-    return moduleTypes;
+    return
+        findRepeatableAnnotations(element, IncludeModule.class)
+            .stream()
+            .map(IncludeModule::value)
+            .flatMap(Stream::of)
+            .collect(toSet());
   }
 
   @Override
@@ -249,9 +235,11 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     Parameter parameter = parameterContext.getParameter();
     Key<?> key = getKey(parameter);
     Injector injector = getInjectorForParameterResolution(extensionContext)
-        .orElseThrow(() -> new ParameterResolutionException(
-            "Could not create injector for: " + extensionContext.getDisplayName()
-                + " It has no element."));
+        .orElseThrow(() ->
+            new ParameterResolutionException(
+                String.format(
+                    "Could not create injector for: %s It has no annotated element.",
+                    extensionContext.getDisplayName())));
 
     return injector.getInstance(key);
   }
