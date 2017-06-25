@@ -69,7 +69,6 @@ public class UsageExampleTests {
     @ValueSource(strings = "java.util.List")
     void badLowerBound(@ConvertWith(ClassArgumentConverter.class) Class<? super Collection> clazz) {}
 
-
     @ParameterizedTest
     @ValueSource(strings = "java.lang.Object")
     void badUpperound(@ConvertWith(ClassArgumentConverter.class) Class<? extends Collection> clazz) {}
