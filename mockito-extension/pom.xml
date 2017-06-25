@@ -3,12 +3,12 @@
   <parent>
     <artifactId>junit5-extensions</artifactId>
     <groupId>name.falgout.jeffrey.testing.junit5</groupId>
-    <version>1.0.0-M4</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>mockito-extension</artifactId>
-  <version>1.0.0-M4</version>
+  <version>1.0.0-SNAPSHOT</version>
 
   <name>mockito-extension</name>
   <url>${base.url}/tree/master/mockito-extension</url>
@@ -19,7 +19,7 @@
     <connection>scm:git:${base.url}.git</connection>
     <developerConnection>scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git</developerConnection>
     <url>${base.url}</url>
-    <tag>junit5-extensions-1.0.0-M4</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <dependencies>
