@@ -106,7 +106,6 @@ public class GuiceExtensionTest {
   }
 
   @SuppressWarnings("unused")
-  @ExtendWith(ExpectFailureExceptionHandler.class)
   @Nested
   class NegativeExamples {
     @ExpectFailure(

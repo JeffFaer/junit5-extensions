@@ -61,7 +61,6 @@ public class UsageExampleTests {
 
   @SuppressWarnings("unused")
   @Nested
-  @ExtendWith(ExpectFailureExceptionHandler.class)
   class NegativeExamples {
     @ExpectFailure({
         @Cause(type = ParameterResolutionException.class),

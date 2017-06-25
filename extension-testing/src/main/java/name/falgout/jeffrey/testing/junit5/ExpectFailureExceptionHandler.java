@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
 import org.junit.jupiter.api.extension.TestExtensionContext;
 
-public final class ExpectFailureExceptionHandler implements TestExecutionExceptionHandler,
+final class ExpectFailureExceptionHandler implements TestExecutionExceptionHandler,
     AfterEachCallback {
   private static final Namespace NAMESPACE =
       Namespace.create("name", "falgout", "jeffrey", "testing", "junit5", "expected", "failure");

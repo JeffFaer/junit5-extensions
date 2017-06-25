@@ -55,7 +55,6 @@ public class MockitoExtensionTest {
   }
 
   @SuppressWarnings("unused")
-  @ExtendWith(ExpectFailureExceptionHandler.class)
   @Nested
   class NegativeExamples {
     @ExpectFailure(

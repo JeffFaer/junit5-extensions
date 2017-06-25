@@ -9,7 +9,6 @@ import name.falgout.jeffrey.testing.junit5.TestPlanExecutionReport.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(ExpectFailureExceptionHandler.class)
 public class ExpectFailureTest {
   @ExpectFailure(@Cause(type = IllegalArgumentException.class, message = "bar"))
   @Test
@@ -93,7 +92,6 @@ public class ExpectFailureTest {
     );
   }
 
-  @ExtendWith(ExpectFailureExceptionHandler.class)
   static class NegativeExamples {
     @ExpectFailure(@Cause(type = IllegalArgumentException.class))
     @Test
