@@ -1,14 +1,13 @@
 package name.falgout.jeffrey.testing.junit5;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import name.falgout.jeffrey.testing.junit5.ExpectFailure.Cause;
-import name.falgout.jeffrey.testing.junit5.TestPlanExecutionReport.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,6 +51,11 @@ public class MockitoExtensionTest {
 
     verify(mock).apply(captor.capture());
     assertThat(captor.getAllValues()).containsExactly("foo");
+  }
+
+  @Test
+  void mocksAreDifferent(@Mock List<String> list1, @Mock List<String> list2) {
+    assertThat(list1).isNotEqualTo(list2);
   }
 
   @SuppressWarnings("unused")
