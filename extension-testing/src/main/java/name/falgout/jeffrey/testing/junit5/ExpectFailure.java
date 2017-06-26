@@ -16,7 +16,7 @@ public @interface ExpectFailure {
   /**
    * A list of causes used to match against the nested causes of an exception.
    */
-  Cause[] value();
+  Cause[] value() default {@Cause};
 
   @interface Cause {
     Class<? extends Throwable> type() default Throwable.class;

@@ -7,7 +7,6 @@ import java.io.IOException;
 import name.falgout.jeffrey.testing.junit5.ExpectFailure.Cause;
 import name.falgout.jeffrey.testing.junit5.TestPlanExecutionReport.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 public class ExpectFailureTest {
   @ExpectFailure(@Cause(type = IllegalArgumentException.class, message = "bar"))
@@ -41,6 +40,12 @@ public class ExpectFailureTest {
   @Test
   void typeIsOptional() {
     throw new Error("only message");
+  }
+
+  @ExpectFailure
+  @Test
+  void causeIsOptional() {
+    throw new IllegalArgumentException();
   }
 
   @Test
