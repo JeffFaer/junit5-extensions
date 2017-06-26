@@ -1,7 +1,9 @@
 # disable-extension
 
-Finer grained control for disabling tests. Can be used to disable arbitrarily
-nested, inherited tests.
+[![Maven Central][mvn-img]][mvn-link]
+
+Fine-grained control over disabling tests. Can be used to disable
+arbitrarily nested, inherited tests.
 
 ````java
 public abstract class BaseTest {
@@ -26,3 +28,6 @@ public class DerivedTest {
   void otherTest() {}
 }
 ````
+
+[mvn-img]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing.junit5/disable-extension/badge.svg
+[mvn-link]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing.junit5/disable-extension

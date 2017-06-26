@@ -1,8 +1,9 @@
-# junit5-guice-extension
+# guice-extension
 
 [![Maven Central][mvn-img]][mvn-link]
 
-A [JUnit 5 extension](src/main/java/name/falgout/jeffrey/testing/junit5/GuiceExtension.java) which will inject fields marked with `@Inject` and will attempt to resolve any method parameters in your tests.
+Injects fields marked with `@Inject` and attempts to resolve any method
+parameters in your tests.
 
 ````java
 @ExtendWith(GuiceExtension.class)
@@ -37,5 +38,5 @@ public class YourTest {
 }
 ````
 
-[mvn-img]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing/junit5-guice-extension/badge.svg
-[mvn-link]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing/junit5-guice-extension
+[mvn-img]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing.junit5/guice-extension/badge.svg
+[mvn-link]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing.junit5/guice-extension

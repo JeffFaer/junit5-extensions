@@ -1,6 +1,8 @@
 # class-argument-converter
 
-Converts strings to classes in a type safe way.
+[![Maven Central][mvn-img]][mvn-link]
+
+Convert parameterized test strings to classes in a type-safe way.
 
 ### Positive Examples
 ````java
@@ -62,3 +64,6 @@ Converts strings to classes in a type safe way.
     void badUpperBound(@ConvertWith(ClassArgumentConverter.class) Class<? extends Collection> clazz) {}
     // Will fail since Class<Object> is not assignable to Class<? extends Collection>.
 ````
+
+[mvn-img]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing.junit5/class-argument-converter/badge.svg
+[mvn-link]: https://maven-badges.herokuapp.com/maven-central/name.falgout.jeffrey.testing.junit5/class-argument-converter
