@@ -56,15 +56,17 @@ public class ExpectFailureTest {
     DisplayName wrongExceptionThrown = DisplayName.create("wrongExceptionThrown()");
     DisplayName wrongCauseThrown = DisplayName.create("wrongCauseThrown()");
     DisplayName noCauseThrown = DisplayName.create("noCauseThrown()");
+    DisplayName wrongMessage = DisplayName.create("wrongMessage()");
     assertAll(
-        () -> assertThat(report.getTests()).hasSize(4),
+        () -> assertThat(report.getTests()).hasSize(5),
         () ->
             assertThat(report.getFailures().keySet())
                 .containsAllOf(
                     noExceptionThrown,
                     wrongExceptionThrown,
                     wrongCauseThrown,
-                    noCauseThrown),
+                    noCauseThrown,
+                    wrongMessage),
         () -> {
           Throwable failure = report.getFailure(noExceptionThrown).get();
           assertThat(failure).isInstanceOf(AssertionError.class);
@@ -93,6 +95,12 @@ public class ExpectFailureTest {
               .contains("Unexpected cause for java.lang.IllegalArgumentException");
           assertThat(failure).hasMessageThat()
               .contains("Not true that <null> is an instance of <java.io.IOException>");
+        },
+        () -> {
+          Throwable failure = report.getFailure(wrongMessage).get();
+          assertThat(failure).isInstanceOf(AssertionError.class);
+          assertThat(failure).hasMessageThat()
+              .contains("Not true that <\"54321\"> contains <\"12345\">");
         }
     );
   }
@@ -124,6 +132,12 @@ public class ExpectFailureTest {
     @Test
     void noCauseThrown() {
       throw new IllegalArgumentException("foo");
+    }
+
+    @ExpectFailure(@Cause(message = "12345"))
+    @Test
+    void wrongMessage() {
+      throw new IllegalArgumentException("54321");
     }
   }
 }
