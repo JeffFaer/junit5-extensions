@@ -23,7 +23,7 @@ public abstract class BaseTest {
 
 @Disable("badTest()")
 @Disable({"NestedTests", "badNestedTest()"})
-public class DerivedTest {
+public class DerivedTest extends BaseTest {
   @Test
   void otherTest() {}
 }
