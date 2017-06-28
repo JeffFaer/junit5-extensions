@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-@ExtendWith(GuiceExtension.class)
 @IncludeModule(TestModule.class)
 public class GuiceExtensionTest {
   @Inject static int STATIC_INJECTION;
@@ -84,7 +83,6 @@ public class GuiceExtensionTest {
   }
 
   @SuppressWarnings("unused")
-  @ExtendWith(GuiceExtension.class)
   @IncludeModule(TestModule.class)
   static abstract class BaseType {
     @Inject String baseClassFieldInjection;

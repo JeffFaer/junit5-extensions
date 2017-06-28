@@ -8,11 +8,13 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @Documented
 @Retention(RUNTIME)
 @Target({TYPE, METHOD})
 @Inherited
+@ExtendWith(GuiceExtension.class)
 public @interface IncludeModules {
   IncludeModule[] value();
 }
