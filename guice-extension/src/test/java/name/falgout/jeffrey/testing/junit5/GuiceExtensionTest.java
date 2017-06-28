@@ -104,6 +104,18 @@ public class GuiceExtensionTest {
   }
 
   @SuppressWarnings("unused")
+  static abstract class GenericBaseType<T> {
+    @Test
+    void checkNotNull(T t) {
+      assertThat(t).isNotNull();
+    }
+  }
+
+  @Nested
+  @IncludeModule(TestModule.class)
+  class GenericDerivedType extends GenericBaseType<String> {}
+
+  @SuppressWarnings("unused")
   @Nested
   class NegativeExamples {
     @ExpectFailure(

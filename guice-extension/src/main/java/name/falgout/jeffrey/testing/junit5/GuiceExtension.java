@@ -194,7 +194,9 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
       return false;
     }
 
-    Key<?> key = getKey(parameter);
+    Key<?> key = getKey(
+        extensionContext.getTestClass(),
+        parameter);
     Optional<Injector> optInjector = getInjectorForParameterResolution(extensionContext);
     return optInjector.map(injector -> injector.getExistingBinding(key)).isPresent();
   }
@@ -223,7 +225,7 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
   public Object resolve(ParameterContext parameterContext, ExtensionContext extensionContext)
       throws ParameterResolutionException {
     Parameter parameter = parameterContext.getParameter();
-    Key<?> key = getKey(parameter);
+    Key<?> key = getKey(extensionContext.getTestClass(), parameter);
     Injector injector = getInjectorForParameterResolution(extensionContext)
         .orElseThrow(() ->
             new ParameterResolutionException(
@@ -234,8 +236,10 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return injector.getInstance(key);
   }
 
-  private static Key<?> getKey(Parameter parameter) {
-    TypeToken<?> classType = TypeToken.of(parameter.getDeclaringExecutable().getDeclaringClass());
+  private static Key<?> getKey(Optional<Class<?>> containingElement, Parameter parameter) {
+    Class<?> clazz = containingElement
+        .orElseGet(() -> parameter.getDeclaringExecutable().getDeclaringClass());
+    TypeToken<?> classType = TypeToken.of(clazz);
     Type resolvedType = classType.resolveType(parameter.getParameterizedType()).getType();
 
     Optional<Key<?>> key =
