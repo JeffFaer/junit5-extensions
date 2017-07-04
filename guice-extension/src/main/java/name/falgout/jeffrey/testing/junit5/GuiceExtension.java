@@ -201,6 +201,21 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return optInjector.map(injector -> injector.getExistingBinding(key)).isPresent();
   }
 
+  @Override
+  public Object resolve(ParameterContext parameterContext, ExtensionContext extensionContext)
+      throws ParameterResolutionException {
+    Parameter parameter = parameterContext.getParameter();
+    Key<?> key = getKey(extensionContext.getTestClass(), parameter);
+    Injector injector = getInjectorForParameterResolution(extensionContext)
+        .orElseThrow(() ->
+            new ParameterResolutionException(
+                String.format(
+                    "Could not create injector for: %s It has no annotated element.",
+                    extensionContext.getDisplayName())));
+
+    return injector.getInstance(key);
+  }
+
   /**
    * Wrap {@link #getOrCreateInjector(ExtensionContext)} and rethrow exceptions as
    * {@link ParameterResolutionException}.
@@ -221,24 +236,9 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     }
   }
 
-  @Override
-  public Object resolve(ParameterContext parameterContext, ExtensionContext extensionContext)
-      throws ParameterResolutionException {
-    Parameter parameter = parameterContext.getParameter();
-    Key<?> key = getKey(extensionContext.getTestClass(), parameter);
-    Injector injector = getInjectorForParameterResolution(extensionContext)
-        .orElseThrow(() ->
-            new ParameterResolutionException(
-                String.format(
-                    "Could not create injector for: %s It has no annotated element.",
-                    extensionContext.getDisplayName())));
-
-    return injector.getInstance(key);
-  }
-
   private static Key<?> getKey(Optional<Class<?>> containingElement, Parameter parameter) {
-    Class<?> clazz = containingElement
-        .orElseGet(() -> parameter.getDeclaringExecutable().getDeclaringClass());
+    Class<?> clazz =
+        containingElement.orElseGet(() -> parameter.getDeclaringExecutable().getDeclaringClass());
     TypeToken<?> classType = TypeToken.of(clazz);
     Type resolvedType = classType.resolveType(parameter.getParameterizedType()).getType();
 
