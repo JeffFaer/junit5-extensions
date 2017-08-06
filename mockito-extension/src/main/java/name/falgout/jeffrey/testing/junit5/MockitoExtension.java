@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.jupiter.api.extension.TestExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -35,18 +34,20 @@ public final class MockitoExtension implements TestInstancePostProcessor, AfterE
   }
 
   @Override
-  public void afterEach(TestExtensionContext context) throws Exception {
+  public void afterEach(ExtensionContext context) throws Exception {
     Mockito.validateMockitoUsage();
   }
 
   @Override
-  public boolean supports(ParameterContext parameterContext, ExtensionContext extensionContext)
+  public boolean supportsParameter(ParameterContext parameterContext,
+      ExtensionContext extensionContext)
       throws ParameterResolutionException {
     return getSupportedFactories(parameterContext.getParameter()).findAny().isPresent();
   }
 
   @Override
-  public Object resolve(ParameterContext parameterContext, ExtensionContext extensionContext)
+  public Object resolveParameter(ParameterContext parameterContext,
+      ExtensionContext extensionContext)
       throws ParameterResolutionException {
     List<ParameterFactory> validFactories =
         getSupportedFactories(parameterContext.getParameter()).collect(toList());

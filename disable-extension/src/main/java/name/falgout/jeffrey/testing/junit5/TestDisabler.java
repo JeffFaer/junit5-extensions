@@ -8,26 +8,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.api.extension.ContainerExecutionCondition;
-import org.junit.jupiter.api.extension.ContainerExtensionContext;
+import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.TestExecutionCondition;
-import org.junit.jupiter.api.extension.TestExtensionContext;
 
-final class TestDisabler implements TestExecutionCondition, ContainerExecutionCondition {
+final class TestDisabler implements ExecutionCondition {
   TestDisabler() {}
 
   @Override
-  public ConditionEvaluationResult evaluate(ContainerExtensionContext context) {
-    return evaluate((ExtensionContext) context);
-  }
-
-  @Override
-  public ConditionEvaluationResult evaluate(TestExtensionContext context) {
-    return evaluate((ExtensionContext) context);
-  }
-
-  public ConditionEvaluationResult evaluate(ExtensionContext context) {
+  public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
     return evaluate(new LinkedList<>(), context);
   }
 

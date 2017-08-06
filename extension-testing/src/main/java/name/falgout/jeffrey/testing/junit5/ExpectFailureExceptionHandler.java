@@ -6,9 +6,9 @@ import com.google.common.truth.ThrowableSubject;
 import java.util.Optional;
 import name.falgout.jeffrey.testing.junit5.ExpectFailure.Cause;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.TestExecutionExceptionHandler;
-import org.junit.jupiter.api.extension.TestExtensionContext;
 
 final class ExpectFailureExceptionHandler implements TestExecutionExceptionHandler,
     AfterEachCallback {
@@ -16,7 +16,7 @@ final class ExpectFailureExceptionHandler implements TestExecutionExceptionHandl
       Namespace.create("name", "falgout", "jeffrey", "testing", "junit5", "expected", "failure");
 
   @Override
-  public void handleTestExecutionException(TestExtensionContext context, Throwable throwable)
+  public void handleTestExecutionException(ExtensionContext context, Throwable throwable)
       throws Throwable {
     Optional<ExpectFailure> annotation = getAnnotation(context);
 
@@ -38,7 +38,7 @@ final class ExpectFailureExceptionHandler implements TestExecutionExceptionHandl
   }
 
   @Override
-  public void afterEach(TestExtensionContext context) throws Exception {
+  public void afterEach(ExtensionContext context) throws Exception {
     Optional<ExpectFailure> annotation = getAnnotation(context);
     if (!annotation.isPresent()) {
       return;
@@ -50,7 +50,7 @@ final class ExpectFailureExceptionHandler implements TestExecutionExceptionHandl
     }
   }
 
-  private static Optional<ExpectFailure> getAnnotation(TestExtensionContext context) {
+  private static Optional<ExpectFailure> getAnnotation(ExtensionContext context) {
     return context.getElement().map(element -> element.getAnnotation(ExpectFailure.class));
   }
 }

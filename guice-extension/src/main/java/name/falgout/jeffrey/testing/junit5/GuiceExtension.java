@@ -187,7 +187,8 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
   }
 
   @Override
-  public boolean supports(ParameterContext parameterContext, ExtensionContext extensionContext)
+  public boolean supportsParameter(ParameterContext parameterContext,
+      ExtensionContext extensionContext)
       throws ParameterResolutionException {
     Parameter parameter = parameterContext.getParameter();
     if (getBindingAnnotations(parameter).size() > 1) {
@@ -202,7 +203,8 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
   }
 
   @Override
-  public Object resolve(ParameterContext parameterContext, ExtensionContext extensionContext)
+  public Object resolveParameter(ParameterContext parameterContext,
+      ExtensionContext extensionContext)
       throws ParameterResolutionException {
     Parameter parameter = parameterContext.getParameter();
     Key<?> key = getKey(extensionContext.getTestClass(), parameter);

@@ -155,13 +155,15 @@ public class GuiceExtensionTest {
 
   static final class FooBarExtension implements ParameterResolver {
     @Override
-    public boolean supports(ParameterContext parameterContext, ExtensionContext extensionContext)
+    public boolean supportsParameter(ParameterContext parameterContext,
+        ExtensionContext extensionContext)
         throws ParameterResolutionException {
       return parameterContext.getParameter().getType() == String[].class;
     }
 
     @Override
-    public Object resolve(ParameterContext parameterContext, ExtensionContext extensionContext)
+    public Object resolveParameter(ParameterContext parameterContext,
+        ExtensionContext extensionContext)
         throws ParameterResolutionException {
       return new String[]{"foo", "bar"};
     }
