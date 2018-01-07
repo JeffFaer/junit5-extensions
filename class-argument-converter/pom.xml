@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -18,7 +20,9 @@
 
   <scm>
     <connection>scm:git:${base.url}.git</connection>
-    <developerConnection>scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git</developerConnection>
+    <developerConnection>
+      scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git
+    </developerConnection>
     <url>${base.url}</url>
     <tag>HEAD</tag>
   </scm>
@@ -48,4 +52,21 @@
       <artifactId>truth</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Automatic-Module-Name>
+                name.falgout.jeffrey.testing.junit.args.types
+              </Automatic-Module-Name>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
