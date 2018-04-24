@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>name.falgout.jeffrey.testing.junit5</groupId>
     <artifactId>junit5-extensions</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
   </parent>
 
   <artifactId>extension-testing</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
 
   <name>extension-testing</name>
   <url>${base.url}/tree/master/extension-testing</url>
@@ -24,7 +22,7 @@
       scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git
     </developerConnection>
     <url>${base.url}</url>
-    <tag>HEAD</tag>
+    <tag>junit5-extensions-1.0.1</tag>
   </scm>
 
   <dependencies>
