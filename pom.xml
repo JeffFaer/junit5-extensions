@@ -92,7 +92,13 @@
       <dependency>
         <groupId>com.google.auto.value</groupId>
         <artifactId>auto-value</artifactId>
-        <version>1.4.1</version>
+        <version>1.6</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.auto.value</groupId>
+        <artifactId>auto-value-annotations</artifactId>
+        <version>1.6</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
@@ -151,6 +157,10 @@
               <version>${junit.jupiter.version}</version>
             </dependency>
           </dependencies>
+        </plugin>
+        <plugin>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>2.4</version>
         </plugin>
       </plugins>
     </pluginManagement>
