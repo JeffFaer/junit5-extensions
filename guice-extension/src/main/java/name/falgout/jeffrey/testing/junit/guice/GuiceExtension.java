@@ -7,10 +7,12 @@ import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
 import com.google.inject.BindingAnnotation;
+import com.google.inject.ConfigurationException;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.ProvisionException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -199,7 +201,16 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
         extensionContext.getTestClass(),
         parameter);
     Optional<Injector> optInjector = getInjectorForParameterResolution(extensionContext);
-    return optInjector.map(injector -> injector.getExistingBinding(key)).isPresent();
+    return optInjector.filter(injector -> {
+      try {
+        injector.getInstance(key);
+        return true;
+      } catch (ConfigurationException | ProvisionException e) {
+        // If we throw a ParameterResolutionException here instead of returning false, we'll block
+        // other ParameterResolvers from being able to work.
+        return false;
+      }
+    }).isPresent();
   }
 
   @Override
@@ -250,7 +261,8 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
   }
 
   /**
-   * @throws IllegalArgumentException if the given element has more than one binding annotation.
+   * @throws IllegalArgumentException if the given element has more than one binding
+   *     annotation.
    */
   private static Optional<? extends Annotation> getOnlyBindingAnnotation(AnnotatedElement element) {
     return Optional.ofNullable(Iterables.getOnlyElement(getBindingAnnotations(element), null));

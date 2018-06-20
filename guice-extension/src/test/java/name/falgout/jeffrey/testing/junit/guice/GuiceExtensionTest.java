@@ -83,6 +83,14 @@ class GuiceExtensionTest {
     assertThat(bound).isEqualTo(TestModule.BOUND);
   }
 
+  @Test
+  void canInjectJustInTimeBindings(
+      @SomeBindingAnnotation String bound,
+      ImplicitlyInjectable justInTime) {
+    assertThat(justInTime).isNotNull();
+    assertThat(justInTime.getArg()).isEqualTo(bound);
+  }
+
   @SuppressWarnings("unused")
   @IncludeModule(TestModule.class)
   static abstract class BaseType {
@@ -151,7 +159,13 @@ class GuiceExtensionTest {
         @Cause(type = ParameterResolutionException.class, message = "No ParameterResolver")
     )
     @Test
-    void doNotHaveBinding(NegativeExamples examples) {}
+    void doesNotHaveInjectConstructor(NotInjectable.Arg arg) {}
+
+    @ExpectFailure(
+        @Cause(type = ParameterResolutionException.class, message = "No ParameterResolver")
+    )
+    @Test
+    void cannotBeInjected(NotInjectable notInjectable) {}
   }
 
   static final class FooBarExtension implements ParameterResolver {
@@ -213,5 +227,27 @@ class GuiceExtensionTest {
 
     @Override
     protected void configure() {}
+  }
+
+  private static class ImplicitlyInjectable {
+    private String arg;
+
+    @Inject
+    ImplicitlyInjectable(@SomeBindingAnnotation String arg) {
+      this.arg = arg;
+    }
+
+    public String getArg() {
+      return arg;
+    }
+  }
+
+  private static class NotInjectable {
+    @Inject
+    NotInjectable(Arg arg) {}
+
+    private static class Arg {
+      private Arg(String s) {}
+    }
   }
 }
