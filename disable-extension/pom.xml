@@ -5,11 +5,11 @@
   <parent>
     <groupId>name.falgout.jeffrey.testing.junit5</groupId>
     <artifactId>junit5-extensions</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
   </parent>
 
   <artifactId>disable-extension</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3-SNAPSHOT</version>
 
   <name>disable-extension</name>
   <url>${base.url}/tree/master/disable-extension</url>
@@ -22,7 +22,7 @@
       scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git
     </developerConnection>
     <url>${base.url}</url>
-    <tag>junit5-extensions-1.0.2</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <dependencies>
