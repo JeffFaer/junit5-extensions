@@ -5,11 +5,11 @@
   <parent>
     <groupId>name.falgout.jeffrey.testing.junit5</groupId>
     <artifactId>junit5-extensions</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
   </parent>
 
   <artifactId>guice-extension</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2</version>
 
   <name>guice-extension</name>
   <url>${base.url}/tree/master/guice-extension</url>
@@ -22,7 +22,7 @@
       scm:git:git@github.com:JeffreyFalgout/junit5-extensions.git
     </developerConnection>
     <url>${base.url}</url>
-    <tag>HEAD</tag>
+    <tag>junit5-extensions-1.0.2</tag>
   </scm>
 
   <dependencies>
