@@ -170,19 +170,33 @@ class GuiceExtensionTest {
     void cannotBeInjected(NotInjectable notInjectable) {}
   }
 
-  @Nested
-  @IncludeModule(CachedModule.class)
-  class CachedInjector {
+    @Nested
+    @IncludeModule(CachedModule.class)
+    class FirstCachedInjectorTest {
 
-    @Test
-    void firstTest(long i) {
-      assertEquals(CachedModule.ATOMIC_LONG.get(), i);
+        @Test
+        void firstTest(long i) {
+            assertEquals(1, i);
+        }
+        @Test
+        void secondTest(long i) {
+            assertEquals(1, i);
+        }
     }
-    @Test
-    void secondTest(long i) {
-      assertEquals(CachedModule.ATOMIC_LONG.get(), i);
+
+    @Nested
+    @IncludeModule(CachedModule.class)
+    class SecondCachedInjectorTest {
+
+        @Test
+        void firstTest(long i) {
+            assertEquals(1, i);
+        }
+        @Test
+        void secondTest(long i) {
+            assertEquals(1, i);
+        }
     }
-  }
 
   static final class FooBarExtension implements ParameterResolver {
     @Override
