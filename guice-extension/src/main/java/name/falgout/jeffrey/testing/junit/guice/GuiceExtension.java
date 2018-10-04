@@ -2,6 +2,7 @@ package name.falgout.jeffrey.testing.junit.guice;
 
 import static java.util.stream.Collectors.toSet;
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
+import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
@@ -25,6 +26,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 import javax.inject.Qualifier;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -38,6 +41,8 @@ import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 public final class GuiceExtension implements TestInstancePostProcessor, ParameterResolver {
   private static final Namespace NAMESPACE =
       Namespace.create("name", "falgout", "jeffrey", "testing", "junit", "guice");
+
+  private static final ConcurrentMap<Set<? extends Class<?>>, Injector> INJECTOR_CACHE = new ConcurrentHashMap<>();
 
   public GuiceExtension() {}
 
@@ -59,16 +64,22 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     if (!context.getElement().isPresent()) {
       return Optional.empty();
     }
-
     AnnotatedElement element = context.getElement().get();
     Store store = context.getStore(NAMESPACE);
-
     Injector injector = store.get(element, Injector.class);
+    boolean sharedInjector = isSharedInjector(context);
+    Set<Class<? extends Module>> moduleClasses = Collections.emptySet();
+    if (injector == null && sharedInjector) {
+      moduleClasses = getContextModuleTypes(context);
+      injector = INJECTOR_CACHE.get(moduleClasses);
+    }
     if (injector == null) {
       injector = createInjector(context);
       store.put(element, injector);
+      if (sharedInjector && !moduleClasses.isEmpty()) {
+        INJECTOR_CACHE.put(moduleClasses, injector);
+      }
     }
-
     return Optional.of(injector);
   }
 
@@ -79,10 +90,17 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
       InvocationTargetException {
     Optional<Injector> parentInjector = getParentInjector(context);
     List<? extends Module> modules = getNewModules(context);
-
     return parentInjector
         .map(injector -> injector.createChildInjector(modules))
         .orElseGet(() -> Guice.createInjector(modules));
+  }
+
+  private static boolean isSharedInjector(ExtensionContext context) {
+    if (!context.getElement().isPresent()) {
+      return false;
+    }
+    AnnotatedElement element = context.getElement().get();
+    return isAnnotated(element, SharedInjectors.class);
   }
 
   private static Optional<Injector> getParentInjector(ExtensionContext context)
