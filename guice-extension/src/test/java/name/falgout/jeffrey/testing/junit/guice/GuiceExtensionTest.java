@@ -2,12 +2,14 @@ package name.falgout.jeffrey.testing.junit.guice;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 import name.falgout.jeffrey.testing.junit.guice.GuiceExtensionTest.TestModule;
 import name.falgout.jeffrey.testing.junit.testing.ExpectFailure;
@@ -168,6 +170,20 @@ class GuiceExtensionTest {
     void cannotBeInjected(NotInjectable notInjectable) {}
   }
 
+  @Nested
+  @IncludeModule(CachedModule.class)
+  class CachedInjector {
+
+    @Test
+    void firstTest(long i) {
+      assertEquals(CachedModule.ATOMIC_LONG.get(), i);
+    }
+    @Test
+    void secondTest(long i) {
+      assertEquals(CachedModule.ATOMIC_LONG.get(), i);
+    }
+  }
+
   static final class FooBarExtension implements ParameterResolver {
     @Override
     public boolean supportsParameter(ParameterContext parameterContext,
@@ -248,6 +264,14 @@ class GuiceExtensionTest {
 
     private static class Arg {
       private Arg(String s) {}
+    }
+  }
+
+  static final class CachedModule extends AbstractModule {
+    static final AtomicLong ATOMIC_LONG = new AtomicLong(0);
+    @Override
+    protected void configure() {
+      bind(long.class).toInstance(ATOMIC_LONG.incrementAndGet());
     }
   }
 }

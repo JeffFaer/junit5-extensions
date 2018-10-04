@@ -25,6 +25,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 import javax.inject.Qualifier;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -38,6 +40,8 @@ import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 public final class GuiceExtension implements TestInstancePostProcessor, ParameterResolver {
   private static final Namespace NAMESPACE =
       Namespace.create("name", "falgout", "jeffrey", "testing", "junit", "guice");
+
+  private static final ConcurrentMap<Set<? extends Class<?>>, Injector> INJECTOR_CACHE = new ConcurrentHashMap<>();
 
   public GuiceExtension() {}
 
@@ -79,10 +83,17 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
       InvocationTargetException {
     Optional<Injector> parentInjector = getParentInjector(context);
     List<? extends Module> modules = getNewModules(context);
-
-    return parentInjector
-        .map(injector -> injector.createChildInjector(modules))
-        .orElseGet(() -> Guice.createInjector(modules));
+    Set<? extends Class<?>> modulClass = modules.stream().map(Object::getClass).collect(toSet());
+    if (!modulClass.isEmpty() && INJECTOR_CACHE.containsKey(modulClass)) {
+      return INJECTOR_CACHE.get(modulClass);
+    }
+    Injector createdInjector = parentInjector
+            .map(injector -> injector.createChildInjector(modules))
+            .orElseGet(() -> Guice.createInjector(modules));
+    if (!modulClass.isEmpty()) {
+      INJECTOR_CACHE.put(modulClass, createdInjector);
+    }
+    return createdInjector;
   }
 
   private static Optional<Injector> getParentInjector(ExtensionContext context)
