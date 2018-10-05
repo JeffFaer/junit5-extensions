@@ -2,6 +2,7 @@ package name.falgout.jeffrey.testing.junit.guice;
 
 import static java.util.stream.Collectors.toSet;
 import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
+import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
@@ -83,17 +84,44 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
       InvocationTargetException {
     Optional<Injector> parentInjector = getParentInjector(context);
     List<? extends Module> modules = getNewModules(context);
-    Set<? extends Class<?>> modulClass = modules.stream().map(Object::getClass).collect(toSet());
-    if (!modulClass.isEmpty() && INJECTOR_CACHE.containsKey(modulClass)) {
-      return INJECTOR_CACHE.get(modulClass);
+    if (isSharedInjector(context)) {
+      return createCachedInjector(modules, parentInjector);
     }
-    Injector createdInjector = parentInjector
+    return parentInjector
             .map(injector -> injector.createChildInjector(modules))
             .orElseGet(() -> Guice.createInjector(modules));
-    if (!modulClass.isEmpty()) {
-      INJECTOR_CACHE.put(modulClass, createdInjector);
+  }
+
+  private static Injector createCachedInjector(List<? extends Module> modules,
+      Optional<Injector> parentInjector) {
+    Set<? extends Class<?>> modulClass = modules.stream().map(Object::getClass).collect(toSet());
+    Optional<Injector> cachedInjector = getCachedInjector(modulClass);
+    if (cachedInjector.isPresent()) {
+      return cachedInjector.get();
+    } else {
+      Injector createdInjector = parentInjector
+          .map(injector -> injector.createChildInjector(modules))
+          .orElseGet(() -> Guice.createInjector(modules));
+      if (!modulClass.isEmpty()) {
+        INJECTOR_CACHE.put(modulClass, createdInjector);
+      }
+      return createdInjector;
     }
-    return createdInjector;
+  }
+
+  private static boolean isSharedInjector(ExtensionContext context) {
+    if (!context.getElement().isPresent()) {
+      return false;
+    }
+    AnnotatedElement element = context.getElement().get();
+    return findAnnotation(element, SharedInjectors.class).isPresent();
+  }
+
+  private static Optional<Injector> getCachedInjector(Set<? extends Class<?>> modulClasses) {
+    if (!modulClasses.isEmpty() && INJECTOR_CACHE.containsKey(modulClasses)) {
+      return Optional.of(INJECTOR_CACHE.get(modulClasses));
+    }
+    return Optional.empty();
   }
 
   private static Optional<Injector> getParentInjector(ExtensionContext context)

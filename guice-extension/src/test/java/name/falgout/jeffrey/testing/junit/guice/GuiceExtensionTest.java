@@ -9,6 +9,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.inject.Inject;
 import name.falgout.jeffrey.testing.junit.guice.GuiceExtensionTest.TestModule;
@@ -172,6 +173,7 @@ class GuiceExtensionTest {
 
     @Nested
     @IncludeModule(CachedModule.class)
+    @SharedInjectors
     class FirstCachedInjectorTest {
 
         @Test
@@ -186,6 +188,7 @@ class GuiceExtensionTest {
 
     @Nested
     @IncludeModule(CachedModule.class)
+    @SharedInjectors
     class SecondCachedInjectorTest {
 
         @Test
@@ -197,6 +200,28 @@ class GuiceExtensionTest {
             assertEquals(1, i);
         }
     }
+
+  @Nested
+  @IncludeModule(NonCachedModule.class)
+   class FirstNonCachedInjectorTest {
+    @Test
+    void test(long i) {
+      long expectedValue = NonCachedModule.SECOND_EXECUTED.get() ? 2 : 1;
+      assertEquals(expectedValue, i);
+      NonCachedModule.FIRST_EXECUTED.set(true);
+    }
+  }
+
+  @Nested
+  @IncludeModule(NonCachedModule.class)
+   class SecondNonCachedInjectorTest {
+    @Test
+    void test(long i) {
+      long expectedValue = NonCachedModule.FIRST_EXECUTED.get() ? 2 : 1;
+      assertEquals(expectedValue, i);
+      NonCachedModule.SECOND_EXECUTED.set(true);
+    }
+  }
 
   static final class FooBarExtension implements ParameterResolver {
     @Override
@@ -283,6 +308,18 @@ class GuiceExtensionTest {
 
   static final class CachedModule extends AbstractModule {
     static final AtomicLong ATOMIC_LONG = new AtomicLong(0);
+    @Override
+    protected void configure() {
+      bind(long.class).toInstance(ATOMIC_LONG.incrementAndGet());
+    }
+  }
+
+  static final class NonCachedModule extends AbstractModule {
+    static final AtomicLong ATOMIC_LONG = new AtomicLong(0);
+    //depend on which test executed first
+    static final AtomicBoolean FIRST_EXECUTED = new AtomicBoolean(false);
+    static final AtomicBoolean SECOND_EXECUTED = new AtomicBoolean(false);
+
     @Override
     protected void configure() {
       bind(long.class).toInstance(ATOMIC_LONG.incrementAndGet());
