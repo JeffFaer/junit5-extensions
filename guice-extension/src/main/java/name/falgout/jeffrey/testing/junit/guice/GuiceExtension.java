@@ -64,16 +64,22 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     if (!context.getElement().isPresent()) {
       return Optional.empty();
     }
-
     AnnotatedElement element = context.getElement().get();
     Store store = context.getStore(NAMESPACE);
-
     Injector injector = store.get(element, Injector.class);
+    boolean sharedInjector = isSharedInjector(context);
+    Set<Class<? extends Module>> moduleClasses = Collections.emptySet();
+    if (injector == null && sharedInjector) {
+      moduleClasses = getContextModuleTypes(context);
+      injector = INJECTOR_CACHE.get(moduleClasses);
+    }
     if (injector == null) {
       injector = createInjector(context);
       store.put(element, injector);
+      if (sharedInjector && !moduleClasses.isEmpty()) {
+        INJECTOR_CACHE.put(moduleClasses, injector);
+      }
     }
-
     return Optional.of(injector);
   }
 
@@ -84,27 +90,9 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
       InvocationTargetException {
     Optional<Injector> parentInjector = getParentInjector(context);
     List<? extends Module> modules = getNewModules(context);
-    Set<Class<? extends Module>> moduleClasses = getContextModuleTypes(context);
-    if (isSharedInjector(context)) {
-      return createCachedInjector(modules, parentInjector, moduleClasses);
-    }
     return parentInjector
-            .map(injector -> injector.createChildInjector(modules))
-            .orElseGet(() -> Guice.createInjector(modules));
-  }
-
-  private static Injector createCachedInjector(List<? extends Module> modules,
-      Optional<Injector> parentInjector, Set<? extends Class<?>> moduleClasses) {
-    return INJECTOR_CACHE.computeIfAbsent(moduleClasses, classes -> {
-          if (classes.isEmpty()) {
-            //no value for empty moduleClasses
-            return null;
-          }
-          return parentInjector
-          .map(injector -> injector.createChildInjector(modules))
-          .orElseGet(() -> Guice.createInjector(modules));
-        }
-    );
+        .map(injector -> injector.createChildInjector(modules))
+        .orElseGet(() -> Guice.createInjector(modules));
   }
 
   private static boolean isSharedInjector(ExtensionContext context) {

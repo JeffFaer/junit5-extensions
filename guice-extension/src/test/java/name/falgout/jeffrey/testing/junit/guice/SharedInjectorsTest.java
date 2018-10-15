@@ -1,11 +1,9 @@
 package name.falgout.jeffrey.testing.junit.guice;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -20,18 +18,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @SharedInjectors
 class SharedInjectorsTest {
 
-  private static final Random RANDOM = new Random();
-
-  private static String getRandomString() {
-    return String.valueOf(RANDOM.nextInt(Integer.MAX_VALUE));
-  }
-
   @Test
   @IncludeModule(TestCaseModule.class)
   @SharedInjectors
   void test1(@Named("base") String base, @Named("test") String test) {
-    assertNotNull(base);
-    assertNotNull(test);
+    assertEquals("base", base);
+    assertEquals("test", test);
   }
 
   @Test
@@ -52,9 +44,9 @@ class SharedInjectorsTest {
     void test1(@Named("base") String base,
         @Named("inner") String inner,
         @Named("test") String test) {
-      assertNotNull(base);
-      assertNotNull(test);
-      assertNotNull(inner);
+      assertEquals("base", base);
+      assertEquals("test", test);
+      assertEquals("inner", inner);
     }
   }
 
@@ -164,7 +156,7 @@ class SharedInjectorsTest {
 
     @Override
     protected void configure() {
-      bind(String.class).annotatedWith(Names.named("base")).toInstance(getRandomString());
+      bind(String.class).annotatedWith(Names.named("base")).toInstance("base");
     }
   }
 
@@ -172,7 +164,7 @@ class SharedInjectorsTest {
 
     @Override
     protected void configure() {
-      bind(String.class).annotatedWith(Names.named("inner")).toInstance(getRandomString());
+      bind(String.class).annotatedWith(Names.named("inner")).toInstance("inner");
     }
   }
 
@@ -180,7 +172,7 @@ class SharedInjectorsTest {
 
     @Override
     protected void configure() {
-      bind(String.class).annotatedWith(Names.named("test")).toInstance(getRandomString());
+      bind(String.class).annotatedWith(Names.named("test")).toInstance("test");
     }
   }
 
