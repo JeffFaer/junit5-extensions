@@ -5,6 +5,5 @@ jdk:
     - openjdk9
     - oraclejdk9
     - openjdk10
-    - oraclejdk10
     - openjdk11
     - oraclejdk11
