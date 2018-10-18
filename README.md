@@ -1,4 +1,6 @@
 # junit5-extensions
+[![Build Status](https://travis-ci.com/JeffreyFalgout/junit5-extensions.svg?branch=master)](https://travis-ci.com/JeffreyFalgout/junit5-extensions)
+
 Personal repository for JUnit 5 extensions.
 
 ## [class-argument-converter](class-argument-converter)
