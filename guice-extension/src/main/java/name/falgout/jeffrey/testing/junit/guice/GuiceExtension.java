@@ -220,6 +220,11 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
         parameter);
     Optional<Injector> optInjector = getInjectorForParameterResolution(extensionContext);
     return optInjector.filter(injector -> {
+
+      // Do not bind String without explicit bindings.
+      if (key.equals(Key.get(String.class)) && injector.getExistingBinding(key) == null)
+        return false;
+
       try {
         injector.getInstance(key);
         return true;
