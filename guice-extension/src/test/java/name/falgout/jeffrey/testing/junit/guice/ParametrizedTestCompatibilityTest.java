@@ -40,7 +40,7 @@ public class ParametrizedTestCompatibilityTest {
         @ExtendWith(GuiceExtension.class)
         @ParameterizedTest
         @ValueSource(classes = Integer.class)
-        void parametrizedTestWithStringsShouldWorkWithGuiceExtension(Class<Object> clazz) {
+        void parametrizedTestWithoutStringsShouldWorkWithGuiceExtension(Class<Object> clazz) {
             assertSame(Integer.class, clazz);
         }
     }
