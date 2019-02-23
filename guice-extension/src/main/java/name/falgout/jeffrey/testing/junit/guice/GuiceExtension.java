@@ -1,9 +1,5 @@
 package name.falgout.jeffrey.testing.junit.guice;
 
-import static java.util.stream.Collectors.toSet;
-import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
-import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
-
 import com.google.common.collect.Iterables;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.AbstractModule;
@@ -14,6 +10,15 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.ProvisionException;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.extension.ExtensionContext.Store;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.extension.TestInstancePostProcessor;
+
+import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
@@ -29,14 +34,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
-import javax.inject.Qualifier;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.ExtensionContext.Store;
-import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.jupiter.api.extension.TestInstancePostProcessor;
+
+import static java.util.stream.Collectors.toSet;
+import static org.junit.platform.commons.support.AnnotationSupport.findRepeatableAnnotations;
+import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 
 public final class GuiceExtension implements TestInstancePostProcessor, ParameterResolver {
   private static final Namespace NAMESPACE =
@@ -222,8 +223,9 @@ public final class GuiceExtension implements TestInstancePostProcessor, Paramete
     return optInjector.filter(injector -> {
 
       // Do not bind String without explicit bindings.
-      if (key.equals(Key.get(String.class)) && injector.getExistingBinding(key) == null)
+      if (key.equals(Key.get(String.class)) && injector.getExistingBinding(key) == null) {
         return false;
+      }
 
       try {
         injector.getInstance(key);
