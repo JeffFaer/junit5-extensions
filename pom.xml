@@ -17,8 +17,8 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit.jupiter.version>5.0.0</junit.jupiter.version>
-    <junit.platform.version>1.0.0</junit.platform.version>
+    <junit.jupiter.version>5.4.0</junit.jupiter.version>
+    <junit.platform.version>1.4.0</junit.platform.version>
     <java.version>1.8</java.version>
     <base.url>https://github.com/JeffreyFalgout/junit5-extensions</base.url>
   </properties>
@@ -104,19 +104,19 @@
       <dependency>
         <groupId>com.google.auto.value</groupId>
         <artifactId>auto-value</artifactId>
-        <version>1.6</version>
+        <version>1.6.3</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>com.google.auto.value</groupId>
         <artifactId>auto-value-annotations</artifactId>
-        <version>1.6</version>
+        <version>1.6.3</version>
         <scope>provided</scope>
       </dependency>
       <dependency>
         <groupId>com.google.auto.service</groupId>
         <artifactId>auto-service</artifactId>
-        <version>1.0-rc3</version>
+        <version>1.0-rc4</version>
         <scope>provided</scope>
       </dependency>
 
@@ -127,6 +127,13 @@
         <version>${junit.jupiter.version}</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter-engine</artifactId>
+        <version>${junit.jupiter.version}</version>
+        <scope>test</scope>
+      </dependency>
+
       <dependency>
         <groupId>com.google.truth</groupId>
         <artifactId>truth</artifactId>
@@ -148,7 +155,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.6.1</version>
+          <version>3.8.0</version>
           <configuration>
             <source>${java.version}</source>
             <target>${java.version}</target>
@@ -156,23 +163,11 @@
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.20</version>
-          <dependencies>
-            <dependency>
-              <groupId>org.junit.platform</groupId>
-              <artifactId>junit-platform-surefire-provider</artifactId>
-              <version>${junit.platform.version}</version>
-            </dependency>
-            <dependency>
-              <groupId>org.junit.jupiter</groupId>
-              <artifactId>junit-jupiter-engine</artifactId>
-              <version>${junit.jupiter.version}</version>
-            </dependency>
-          </dependencies>
+          <version>2.22.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
-          <version>2.4</version>
+          <version>3.1.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
