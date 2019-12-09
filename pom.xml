@@ -119,6 +119,12 @@
         <version>1.0-rc4</version>
         <scope>provided</scope>
       </dependency>
+      <dependency>
+          <groupId>javax.annotation</groupId>
+          <artifactId>javax.annotation-api</artifactId>
+          <version>1.2</version>
+          <scope>provided</scope>
+      </dependency>
 
       <!-- Test dependencies -->
       <dependency>
@@ -220,7 +226,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.1</version>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
