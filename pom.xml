@@ -178,7 +178,7 @@
         <version>2.5.3</version>
         <configuration>
           <useReleaseProfile>false</useReleaseProfile>
-          <releaseProfiles>release,ossrh,github</releaseProfiles>
+          <releaseProfiles>release,ossrh</releaseProfiles>
           <goals>deploy</goals>
           <pushChanges>false</pushChanges>
           <autoVersionSubmodules>true</autoVersionSubmodules>
